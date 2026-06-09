@@ -12,12 +12,18 @@ export default function Admin() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
-      if (!session) navigate('/login');
+      
+      // FIX: Only redirect if you are NOT already at the login page
+      if (!session && window.location.pathname !== '/login') {
+        navigate('/login');
+      }
     });
   }, [navigate]);
 
   if (loading) return <div className="text-white p-10">Verifying session...</div>;
   
-  // This is the ONLY thing that should render if authenticated
+  // If there is no session, don't show the dashboard
+  if (!session) return null; 
+
   return <AdminDashboard />;
 }
