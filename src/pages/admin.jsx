@@ -9,21 +9,28 @@ export default function Admin() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 1. Get the session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
-      
-      // FIX: Only redirect if you are NOT already at the login page
-      if (!session && window.location.pathname !== '/login') {
-        navigate('/login');
-      }
     });
-  }, [navigate]);
+
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   if (loading) return <div className="text-white p-10">Verifying session...</div>;
   
-  // If there is no session, don't show the dashboard
-  if (!session) return null; 
-
-  return <AdminDashboard />;
+  // ONLY render the dashboard if a session exists
+  if (session) {
+    return <AdminDashboard />;
+  } else {
+    // If no session, force the user to login
+    navigate('/login');
+    return null;
+  }
 }

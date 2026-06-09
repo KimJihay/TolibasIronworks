@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import AdminDashboard from './AdminDashboard'; 
+import { Link } from 'react-router-dom';
 import { Hammer, Ruler, Zap, ShieldCheck } from 'lucide-react';
 
 export default function Portfolio() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [activeTab, setActiveTab] = useState('home');
-  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedProject, setSelectedProject] = useState(null);
-
   const [formData, setFormData] = useState({ name: '', contact: '', specs: '' });
   const [formSubmitting, setFormSubmitting] = useState(false);
 
@@ -75,30 +72,29 @@ export default function Portfolio() {
     else { alert('Success! Your inquiry has been sent to Tolibas Iron Works Admin.'); setFormData({ name: '', contact: '', specs: '' }); }
   };
 
-  if (activeTab === 'admin') {
-    return <AdminDashboard onBackToPortfolio={() => setActiveTab('home')} />;
-  }
-
   return (
-    <div className="min-h-screen w-full flex flex-col font-sans antialiased box-border m-0 p-0 text-white">
-      {/* HEADER - Mobile Responsive */}
+    <div className="min-h-screen w-full flex flex-col font-sans antialiased text-white">
+      {/* HEADER */}
       <header className="w-full bg-black/40 z-20 sticky top-0 border-b border-white/10 backdrop-blur-md">
         <div className="flex flex-wrap justify-between items-center py-4 px-6 md:px-16 max-w-7xl mx-auto w-full gap-4">
-          <div onClick={() => setActiveTab('home')} className="flex items-center gap-3 text-base md:text-xl font-black uppercase cursor-pointer select-none">
+          <div onClick={() => setActiveTab('home')} className="flex items-center gap-3 text-base md:text-xl font-black uppercase cursor-pointer">
             <img src="/img/logo.png" alt="Logo" className="w-8 h-8 rounded-full object-cover border border-white bg-zinc-900" />
             <span>Tolibas Iron Works</span>
           </div>
           <nav className="flex flex-wrap justify-center gap-4 md:gap-8 items-center">
             {['home', 'projects', 'about', 'contact'].map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)} className="bg-transparent border-none text-xs md:text-sm font-bold uppercase tracking-wider cursor-pointer transition-all" style={{ color: activeTab === tab ? '#ffffff' : '#cccccc', borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent' }}>
+              <button key={tab} onClick={() => setActiveTab(tab)} className="bg-transparent border-none text-xs md:text-sm font-bold uppercase cursor-pointer transition-all" style={{ color: activeTab === tab ? '#ffffff' : '#cccccc', borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent' }}>
                 {tab === 'about' ? 'About Us' : tab}
               </button>
             ))}
-            <button onClick={() => setActiveTab('admin')} className="text-zinc-600 hover:text-white text-[10px] md:text-xs font-mono uppercase bg-white/5 px-3 py-1 rounded border border-white/5 transition-colors">Log In</button>
+            <Link to="/login" className="text-zinc-600 hover:text-white text-[10px] md:text-xs font-mono uppercase bg-white/5 px-3 py-1 rounded border border-white/5 transition-colors">
+              Log In
+            </Link>
           </nav>
         </div>
       </header>
 
+      {/* HOME SECTION */}
       {activeTab === 'home' && (
         <section className="w-full py-24 md:py-44 px-6 text-center flex-grow flex justify-center items-center">
           <div className="max-w-4xl flex flex-col items-center gap-6">
@@ -112,6 +108,7 @@ export default function Portfolio() {
         </section>
       )}
 
+      {/* PROJECTS SECTION */}
       {activeTab === 'projects' && (
         <section className="w-full max-w-7xl mx-auto pt-10 pb-24 px-6 md:px-16 flex-grow">
           <div className="mb-10 text-center">
@@ -130,8 +127,14 @@ export default function Portfolio() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredItems.map((item) => (
-              <article key={item.id} onClick={() => setSelectedProject(item)} className="bg-black/30 border border-white/10 p-6 cursor-pointer hover:border-white/30">
+              <article key={item.id} className="bg-black/30 border border-white/10 p-6 flex flex-col">
                 <img src={item.image_url} alt={item.title} className="w-full h-64 object-cover mb-4" />
+                {/* Category Tag Added Below */}
+                {item.category && (
+                  <span className="self-start text-[9px] uppercase font-bold tracking-widest bg-white/10 text-zinc-300 px-2 py-1 mb-2 border border-white/10">
+                    {item.category}
+                  </span>
+                )}
                 <h3 className="text-lg font-black uppercase">{item.title}</h3>
                 <p className="text-xs text-zinc-400 mt-2 line-clamp-2">{item.description}</p>
               </article>
@@ -140,26 +143,36 @@ export default function Portfolio() {
         </section>
       )}
 
-      {activeTab === 'about' && (
-        <section className="w-full max-w-4xl mx-auto py-24 px-6 flex-grow flex flex-col justify-center">
-          <div className="bg-black/30 border border-white/10 p-8 md:p-12 shadow-2xl flex flex-col gap-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-black uppercase">Tolibas Iron Works</h2>
-            <div className="text-xs font-bold text-emerald-500 uppercase tracking-widest">Professional Welding Hub</div>
-            <div className="text-xs text-zinc-400 border-t border-b border-white/10 py-6">
-              <p>📍 Purok 1, Abahada, Sinunuc, Zamboanga City</p>
-              <p className="mt-2 text-sm text-zinc-200 font-bold">📞 0906 174 7230</p>
-            </div>
-            <p className="text-sm text-zinc-300 leading-relaxed">We specialize in turning raw iron and premium steel configurations into robust, custom high-security structures designed to shield residential spaces and support industrial frameworks.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-white/10">
-              <div className="flex flex-col items-center gap-2"><Hammer className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Custom</span></div>
-              <div className="flex flex-col items-center gap-2"><Ruler className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Precise</span></div>
-              <div className="flex flex-col items-center gap-2"><Zap className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Welds</span></div>
-              <div className="flex flex-col items-center gap-2"><ShieldCheck className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Durable</span></div>
-            </div>
-          </div>
-        </section>
-      )}
+      {/* ABOUT US SECTION */}
+{activeTab === 'about' && (
+  <section className="w-full max-w-4xl mx-auto py-24 px-6 flex-grow flex flex-col justify-center">
+    <div className="bg-black/30 border border-white/10 p-8 md:p-12 shadow-2xl flex flex-col gap-6 text-center">
+      <h2 className="text-3xl md:text-4xl font-black uppercase">Tolibas Iron Works</h2>
+      
+      {/* Removed "Professional Welding Hub" */}
+      
+      <div className="text-xs text-zinc-400 border-t border-b border-white/10 py-6">
+        <p>📍 Purok 1, Abahada, Sinunuc, Zamboanga City</p>
+        <p className="mt-2 text-sm text-zinc-200 font-bold">📞 0906 174 7230</p>
+      </div>
+      
+      <p className="text-sm text-zinc-300 leading-relaxed max-w-2xl mx-auto">
+        Tolibas Iron Works is a fabrication hub dedicated to quality metalwork. We specialize in transforming raw iron and steel into secure, custom structures, including residential gates, window grills, balustrades, commercial trusses, and structural steel frames. 
+        <br /><br />
+        Our mission is to deliver premium, durable craftsmanship that prioritizes structural integrity, precise measurements, and clean, hand-welded connections to ensure long-lasting security for our clients across Zamboanga City.
+      </p>
 
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-white/10">
+        <div className="flex flex-col items-center gap-2"><Hammer className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Custom</span></div>
+        <div className="flex flex-col items-center gap-2"><Ruler className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Precise</span></div>
+        <div className="flex flex-col items-center gap-2"><Zap className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Welds</span></div>
+        <div className="flex flex-col items-center gap-2"><ShieldCheck className="w-6 h-6"/><span className="text-[9px] uppercase font-black">Durable</span></div>
+      </div>
+    </div>
+  </section>
+)}
+
+      {/* CONTACT SECTION */}
       {activeTab === 'contact' && (
         <section className="w-full max-w-7xl mx-auto py-20 px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center flex-grow">
           <div>
@@ -170,7 +183,9 @@ export default function Portfolio() {
             <input type="text" placeholder="Name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="p-3 bg-zinc-950 border border-white/10 text-white text-xs" />
             <input type="text" placeholder="Contact" required value={formData.contact} onChange={(e) => setFormData({...formData, contact: e.target.value})} className="p-3 bg-zinc-950 border border-white/10 text-white text-xs" />
             <textarea placeholder="Requirements..." required value={formData.specs} onChange={(e) => setFormData({...formData, specs: e.target.value})} className="p-3 bg-zinc-950 border border-white/10 text-white text-xs h-32"></textarea>
-            <button type="submit" className="bg-white text-black font-black py-4 uppercase text-xs">SUBMIT REQUEST</button>
+            <button type="submit" disabled={formSubmitting} className="bg-white text-black font-black py-4 uppercase text-xs">
+              {formSubmitting ? 'SENDING...' : 'SUBMIT REQUEST'}
+            </button>
           </form>
         </section>
       )}
